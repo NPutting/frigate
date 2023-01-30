@@ -5,13 +5,20 @@ title: Creating a config file
 
 This guide walks through the steps to build a configuration file for Frigate. It assumes that you already have an environment setup as described in [Installation](../frigate/installation.md). You should also configure your cameras according to the [camera setup guide](/guides/camera_setup)
 
-### Step 1: Configure the MQTT server
+### Step 1: Configure the MQTT server (Optional)
 
-Frigate requires a functioning MQTT server. Start by adding the mqtt section at the top level in your config:
+Use of a functioning MQTT server is optional for Frigate, but required for the home assistant integration. Start by adding the mqtt section at the top level in your config:
 
+If using mqtt:
 ```yaml
 mqtt:
   host: <ip of your mqtt server>
+```
+
+If not using mqtt:
+```yaml
+mqtt:
+  enabled: False
 ```
 
 If using the Mosquitto Addon in Home Assistant, a username and password is required. For example:
@@ -45,12 +52,6 @@ More details on available detectors can be found [here](../configuration/detecto
 
 Now let's add the first camera:
 
-:::caution
-
-Note that passwords that contain special characters often cause issues with ffmpeg connecting to the camera. If receiving `end-of-file` or `unauthorized` errors with a verified correct password, try changing the password to something simple to rule out the possibility that the password is the issue.
-
-:::
-
 ```yaml
 mqtt:
   host: <ip of your mqtt server>
@@ -67,9 +68,6 @@ cameras:
         - path: rtsp://10.0.10.10:554/rtsp # <----- Update for your camera
           roles:
             - detect
-            - rtmp
-    rtmp:
-      enabled: False # <-- RTMP should be disabled if your stream is not H264
     detect:
       width: 1280 # <---- update for your camera's resolution
       height: 720 # <---- update for your camera's resolution
@@ -79,7 +77,7 @@ cameras:
 
 At this point you should be able to start Frigate and see the the video feed in the UI.
 
-If you get a green image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with H264 RTSP cameras that support TCP connections. If you do not have H264 cameras, make sure you have disabled RTMP. It is possible to enable it, but you must tell ffmpeg to re-encode the video with customized output args.
+If you get an error image from the camera, this means ffmpeg was not able to get the video feed from your camera. Check the logs for error messages from ffmpeg. The default ffmpeg arguments are designed to work with H264 RTSP cameras that support TCP connections.
 
 FFmpeg arguments for other types of cameras can be found [here](../configuration/camera_specific.md).
 
@@ -147,7 +145,6 @@ cameras:
         - path: rtsp://10.0.10.10:554/rtsp
           roles:
             - detect
-            - rtmp
     detect:
       width: 1280
       height: 720
@@ -172,7 +169,6 @@ cameras:
         - path: rtsp://10.0.10.10:554/rtsp
           roles:
             - detect
-            - rtmp
         - path: rtsp://10.0.10.10:554/high_res_stream # <----- Add high res stream
           roles:
             - record
